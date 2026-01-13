@@ -1,0 +1,46 @@
+# Files to exclude from pub.dev publishing
+# This file explicitly controls what gets published, even if files are tracked in git
+
+# Lock files (should not be published for packages)
+pubspec.lock
+
+# Dart tool files
+.dart_tool/
+.packages
+
+# Build artifacts
+build/
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment and secrets
+.env
+*.secret
+*.token
+.pub-credentials
+
+# Deployment files
+DEPLOYMENT.md
+
+# Git files
+.git/
+.gitignore
+
+# CI/CD
+.github/
+.circleci/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
