@@ -17,6 +17,10 @@ void main(List<String> arguments) async {
 
   // Scan command
   final scanParser = ArgParser()
+    ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
+    ..addFlag('quiet', abbr: 'q', help: 'Suppress all output except errors')
+    ..addFlag('json', help: 'Output in JSON format')
+    ..addFlag('no-color', help: 'Disable colored output')
     ..addMultiOption('root',
         abbr: 'r',
         help: 'Root directory to scan (can be specified multiple times)',
@@ -65,6 +69,10 @@ void main(List<String> arguments) async {
 
   // Clean command
   final cleanParser = ArgParser()
+    ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
+    ..addFlag('quiet', abbr: 'q', help: 'Suppress all output except errors')
+    ..addFlag('json', help: 'Output in JSON format')
+    ..addFlag('no-color', help: 'Disable colored output')
     ..addMultiOption('root',
         abbr: 'r',
         help: 'Root directory to scan (can be specified multiple times)',
@@ -92,12 +100,9 @@ void main(List<String> arguments) async {
         help: 'Actually perform deletions (required for cleaning)',
         defaultsTo: false)
     ..addFlag('yes',
-        abbr: 'y',
-        help: 'Skip confirmation prompts',
-        defaultsTo: false)
+        abbr: 'y', help: 'Skip confirmation prompts', defaultsTo: false)
     ..addFlag('trash',
-        help: 'Move to trash instead of deleting directly',
-        defaultsTo: false);
+        help: 'Move to trash instead of deleting directly', defaultsTo: false);
 
   commands['clean'] = CommandRunner(
     'clean',
@@ -126,7 +131,11 @@ void main(List<String> arguments) async {
   );
 
   // Doctor command
-  final doctorParser = ArgParser();
+  final doctorParser = ArgParser()
+    ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
+    ..addFlag('quiet', abbr: 'q', help: 'Suppress all output except errors')
+    ..addFlag('json', help: 'Output in JSON format')
+    ..addFlag('no-color', help: 'Disable colored output');
 
   commands['doctor'] = CommandRunner(
     'doctor',
@@ -185,13 +194,31 @@ void main(List<String> arguments) async {
     exit(1);
   }
 
+  // Extract global flags from command arguments and merge with initial global flags
+  // Command-argument flags take precedence over flags before the command
+  final commandGlobalFlags = {
+    'verbose': commandResults.wasParsed('verbose')
+        ? (commandResults['verbose'] as bool)
+        : (globalFlags['verbose'] as bool),
+    'quiet': commandResults.wasParsed('quiet')
+        ? (commandResults['quiet'] as bool)
+        : (globalFlags['quiet'] as bool),
+    'json': commandResults.wasParsed('json')
+        ? (commandResults['json'] as bool)
+        : (globalFlags['json'] as bool),
+    'no-color': commandResults.wasParsed('no-color')
+        ? (commandResults['no-color'] as bool)
+        : (globalFlags['no-color'] as bool),
+  };
+
   // Run command
   try {
-    final exitCode = await commandRunner.runner(commandResults, globalFlags);
+    final exitCode =
+        await commandRunner.runner(commandResults, commandGlobalFlags);
     exit(exitCode);
   } catch (e, stackTrace) {
     stderr.writeln('Error: $e');
-    if (globalFlags['verbose'] as bool) {
+    if (commandGlobalFlags['verbose'] as bool) {
       stderr.writeln(stackTrace);
     }
     exit(1);
@@ -211,7 +238,8 @@ void _printUsage(ArgParser parser, Map<String, CommandRunner> commands) {
   stdout.writeln('Global options:');
   stdout.writeln(parser.usage);
   stdout.writeln('');
-  stdout.writeln('Use "flutter_cleaner <command> --help" for command-specific options.');
+  stdout.writeln(
+      'Use "flutter_cleaner <command> --help" for command-specific options.');
 }
 
 class CommandRunner {
@@ -222,4 +250,3 @@ class CommandRunner {
 
   CommandRunner(this.name, this.description, this.parser, this.runner);
 }
-
