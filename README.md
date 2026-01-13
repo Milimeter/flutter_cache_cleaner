@@ -186,6 +186,10 @@ Default scan roots (when `--include-defaults` is used):
 - `~/Developer`
 - `~/Projects`
 - `~/Documents`
+- `~/StudioProjects` (Android Studio)
+- `~/IdeaProjects` (IntelliJ IDEA)
+- `~/workspace` (Eclipse)
+- `~/Code`, `~/source`, `~/src`, `~/repos`, `~/repositories` (common workspace locations)
 
 ## Configuration
 
