@@ -36,7 +36,7 @@ After installation, ensure `~/.pub-cache/bin` is in your PATH, or use `dart pub 
 
 ## Usage
 
-### Scan Command
+### Scan Command dart run lib/main.dart doctor --verbose
 
 Scan for Flutter projects and cache files without deleting anything:
 
