@@ -1,0 +1,113 @@
+# Dart/Flutter specific
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.iml
+*.lock
+pubspec.lock
+
+# IDE - IntelliJ / Android Studio
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+local.properties
+.settings/
+.classpath
+.project
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - Other
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+credentials/
+*.secret
+*.token
+.pub-credentials
+
+# Deployment and CI/CD
+deploy/
+*.deploy
+.circleci/
+.github/workflows/*.secret
+*.publish
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+.cache/
+
+# Coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Test files
+test/.test_coverage.dart
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# Backup files
+*.backup
+*.old
+*.orig
+
