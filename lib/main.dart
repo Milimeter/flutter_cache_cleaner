@@ -6,7 +6,7 @@ import 'commands/scan_command.dart';
 import 'commands/clean_command.dart';
 import 'commands/doctor_command.dart';
 
-void main(List<String> arguments) async {
+Future<void> main(List<String> arguments) async {
   final parser = ArgParser()
     ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
     ..addFlag('quiet', abbr: 'q', help: 'Suppress all output except errors')
