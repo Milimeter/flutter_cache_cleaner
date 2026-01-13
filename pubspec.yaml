@@ -1,0 +1,21 @@
+name: flutter_cache_cleaner
+description: A cross-platform CLI utility to safely clean Flutter project build artifacts and global dependency caches
+version: 0.1.0
+homepage: https://github.com/milimeter/flutter_cache_cleaner
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+executables:
+  flutter_cleaner:
+  fcc: flutter_cleaner
+
+dependencies:
+  args: ^2.4.0
+  path: ^1.8.3
+  io: ^1.0.3
+  collection: ^1.18.0
+
+dev_dependencies:
+  lints: ^3.0.0
+
