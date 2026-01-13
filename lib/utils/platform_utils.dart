@@ -17,7 +17,8 @@ class PlatformUtils {
     if (home.isEmpty) return null;
 
     if (Platform.isWindows) {
-      return PathUtils.resolveAbsolute(path.join(home, 'AppData', 'Local', 'Pub', 'Cache'));
+      return PathUtils.resolveAbsolute(
+          path.join(home, 'AppData', 'Local', 'Pub', 'Cache'));
     } else {
       return PathUtils.resolveAbsolute(path.join(home, '.pub-cache'));
     }
@@ -63,9 +64,25 @@ class PlatformUtils {
     if (home.isEmpty) return [];
 
     final roots = <String>[];
-    final commonDirs = ['Developer', 'Projects', 'Documents'];
 
-    for (final dir in commonDirs) {
+    // All potential project directories (common + IDE-specific)
+    final potentialDirs = [
+      // Common project directories
+      'Developer',
+      'Projects',
+      'Documents',
+      // IDE-specific project directories
+      'StudioProjects', // Android Studio
+      'IdeaProjects', // IntelliJ IDEA
+      'workspace', // Eclipse
+      'Code', // VS Code (common workspace location)
+      'source', // Common alternative
+      'src', // Common alternative
+      'repos', // Common for repositories
+      'repositories', // Common for repositories
+    ];
+
+    for (final dir in potentialDirs) {
       final fullPath = path.join(home, dir);
       if (PathUtils.isDirectory(fullPath)) {
         roots.add(fullPath);
@@ -131,4 +148,3 @@ class PlatformUtils {
     return Platform.operatingSystem;
   }
 }
-
