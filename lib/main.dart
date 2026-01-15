@@ -151,31 +151,56 @@ Future<void> main(List<String> arguments) async {
     },
   );
 
-  // Parse arguments
-  ArgResults results;
+  // Find command name first by looking for first positional argument
+  // This allows us to split global flags from command-specific args
+  int commandIndex = -1;
+  for (int i = 0; i < arguments.length; i++) {
+    final arg = arguments[i];
+    // Skip known global flags
+    if (arg == '--verbose' || arg == '-v' ||
+        arg == '--quiet' || arg == '-q' ||
+        arg == '--json' ||
+        arg == '--no-color') {
+      continue;
+    }
+    // Skip flag values (like --no-color which doesn't have a value, but be safe)
+    if (arg.startsWith('-')) {
+      continue;
+    }
+    // First non-flag argument is the command
+    if (commands.containsKey(arg)) {
+      commandIndex = i;
+      break;
+    }
+  }
+
+  // If no command found, show usage
+  if (commandIndex == -1) {
+    _printUsage(parser, commands);
+    exit(1);
+  }
+
+  // Split arguments: global flags come before command, command args come after
+  final globalArgs = arguments.sublist(0, commandIndex);
+  final commandName = arguments[commandIndex];
+  final commandArgs = arguments.sublist(commandIndex + 1);
+
+  // Parse global flags
+  ArgResults globalResults;
   try {
-    results = parser.parse(arguments);
+    globalResults = parser.parse(globalArgs);
   } catch (e) {
-    stderr.writeln('Error parsing arguments: $e');
+    stderr.writeln('Error parsing global arguments: $e');
     exit(1);
   }
 
   // Handle global flags
   final globalFlags = {
-    'verbose': results['verbose'] as bool,
-    'quiet': results['quiet'] as bool,
-    'json': results['json'] as bool,
-    'no-color': results['no-color'] as bool,
+    'verbose': globalResults['verbose'] as bool,
+    'quiet': globalResults['quiet'] as bool,
+    'json': globalResults['json'] as bool,
+    'no-color': globalResults['no-color'] as bool,
   };
-
-  // Get command
-  if (results.rest.isEmpty) {
-    _printUsage(parser, commands);
-    exit(1);
-  }
-
-  final commandName = results.rest[0];
-  final commandArgs = results.rest.sublist(1);
 
   if (!commands.containsKey(commandName)) {
     stderr.writeln('Unknown command: $commandName');
