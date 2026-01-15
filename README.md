@@ -18,16 +18,18 @@ Over years of Flutter development, machines often accumulate tens of gigabytes o
 
 ## Installation
 
-### From pub.dev (when published)
+### From pub.dev
 
 ```bash
 dart pub global activate flutter_cache_cleaner
 ```
 
+The package is available on [pub.dev](https://pub.dev/packages/flutter_cache_cleaner).
+
 ### From source
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/milimeter/flutter_cache_cleaner.git
 cd flutter_cache_cleaner
 dart pub global activate --source path .
 ```
@@ -311,4 +313,8 @@ MIT
 
 ## Support
 
-For issues, questions, or feature requests, please open an issue on the GitHub repository.
+For issues, questions, or feature requests, please open an issue on the [GitHub repository](https://github.com/milimeter/flutter_cache_cleaner).
+
+## Contributors
+
+- **[milimeter](https://github.com/milimeter)** - Creator and maintainer
