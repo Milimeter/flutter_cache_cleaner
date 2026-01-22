@@ -33,6 +33,41 @@ abstract class BaseCommand {
     }
   }
 
+  /// Prints verbose progress message (for ongoing operations).
+  void printVerboseProgress(String message) {
+    if (verbose && !quiet) {
+      stdout.writeln('  → $message');
+    }
+  }
+
+  /// Prints verbose step information (for step-by-step operations).
+  void printVerboseStep(String step, [String? details]) {
+    if (verbose && !quiet) {
+      if (details != null) {
+        stdout.writeln('  [$step] $details');
+      } else {
+        stdout.writeln('  [$step]');
+      }
+    }
+  }
+
+  /// Prints verbose timing information.
+  void printVerboseTiming(String operation, Duration duration) {
+    if (verbose && !quiet) {
+      final seconds = duration.inMilliseconds / 1000.0;
+      stdout.writeln('  ⏱  $operation: ${seconds.toStringAsFixed(2)}s');
+    }
+  }
+
+  /// Gets a verbose logger function that can be passed to core classes.
+  /// Returns null if verbose is disabled.
+  void Function(String message)? getVerboseLogger() {
+    if (verbose && !quiet) {
+      return (String message) => stdout.writeln('  → $message');
+    }
+    return null;
+  }
+
   /// Formats a size in bytes to human-readable format.
   String formatSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
