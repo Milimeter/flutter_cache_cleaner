@@ -63,6 +63,9 @@ flutter_cleaner scan --root ~/Developer/flutter --depth 3
 
 # JSON output
 flutter_cleaner scan --root ~/Developer/flutter --json
+
+# Verbose output for detailed progress
+flutter_cleaner scan --root ~/Developer/flutter --verbose
 ```
 
 ### Clean Command
@@ -87,6 +90,9 @@ flutter_cleaner clean --root ~/Developer/flutter --apply --optional
 
 # Include global caches (use with caution!)
 flutter_cleaner clean --root ~/Developer/flutter --apply --global
+
+# Verbose output to see detailed cleaning progress
+flutter_cleaner clean --root ~/Developer/flutter --apply --verbose
 ```
 
 ### Doctor Command
@@ -105,10 +111,18 @@ flutter_cleaner doctor --json
 
 ### Global Options
 
-- `--verbose, -v`: Enable verbose output
+- `--verbose, -v`: Enable verbose output with detailed progress information, timing, and step-by-step operations
 - `--quiet, -q`: Suppress all output except errors
 - `--json`: Output in JSON format
 - `--no-color`: Disable colored output
+
+**Verbose Mode**: When enabled, provides real-time feedback including:
+- Progress indicators (e.g., "Analyzing project 15/62")
+- Timing information for major operations
+- Detailed logging of directories being scanned
+- Per-project cache target analysis
+- Deletion progress during cleaning operations
+- Global cache size calculation progress
 
 ### Scan Command Options
 

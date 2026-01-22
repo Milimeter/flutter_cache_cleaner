@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2025-01-13
+
+### Added
+- Enhanced verbose output with real-time progress tracking
+- Progress indicators showing current operation and project counts
+- Timing information for major operations (scanning, analysis, cleaning)
+- Detailed logging throughout core operations:
+  - Project detection progress (directories scanned, projects found)
+  - Cache target analysis with per-project progress (X/Y projects)
+  - Cleaning progress with per-target deletion status
+  - Global cache size calculation progress
+- New verbose helper methods in BaseCommand:
+  - `printVerboseProgress()` for ongoing operations
+  - `printVerboseStep()` for step-by-step operations
+  - `printVerboseTiming()` for timing information
+  - `getVerboseLogger()` for passing to core classes
+
+### Improved
+- Verbose output now provides comprehensive feedback during long-running operations
+- Better visibility into what the tool is doing at each stage
+- More informative error context in verbose mode
+
 ## [0.1.1] - 2025-01-13
 
 ### Fixed
