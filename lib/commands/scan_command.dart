@@ -36,12 +36,14 @@ class ScanCommand extends BaseCommand {
     printVerbose('Max depth: ${maxDepth == 0 ? "unlimited" : maxDepth}');
 
     try {
+      final verboseLogger = getVerboseLogger();
       final result = await CacheScanner.scan(
         priorityRoots: priorityRoots,
         includeDefaults: includeDefaults,
         includeOptional: includeOptional,
         includeGlobal: includeGlobal,
         maxDepth: maxDepth,
+        verboseLogger: verboseLogger,
       );
 
       if (jsonOutput) {
