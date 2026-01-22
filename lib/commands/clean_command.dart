@@ -49,12 +49,14 @@ class CleanCommand extends BaseCommand {
 
     try {
       // First, scan to find what will be deleted
+      final verboseLogger = getVerboseLogger();
       final scanResult = await CacheScanner.scan(
         priorityRoots: priorityRoots,
         includeDefaults: includeDefaults,
         includeOptional: includeOptional,
         includeGlobal: includeGlobal,
         maxDepth: maxDepth,
+        verboseLogger: verboseLogger,
       );
 
       if (scanResult.totalSize == 0) {
@@ -80,7 +82,10 @@ class CleanCommand extends BaseCommand {
       printMessage('Cleaning caches...');
       printVerbose('Move to trash: $moveToTrash');
 
-      final cleaner = CacheCleaner(moveToTrash: moveToTrash);
+      final cleaner = CacheCleaner(
+        moveToTrash: moveToTrash,
+        verboseLogger: verboseLogger,
+      );
       final cleanResult = await _performCleaning(scanResult, cleaner);
 
       // Print results
@@ -100,33 +105,56 @@ class CleanCommand extends BaseCommand {
   /// Performs the actual cleaning operation.
   Future<CleanResult> _performCleaning(
       ScanResult scanResult, CacheCleaner cleaner) async {
+    final verboseLogger = getVerboseLogger();
+    final cleanStart = DateTime.now();
+    
     final allDeletedPaths = <String>[];
     final allFailedPaths = <String, String>{};
     int totalReclaimed = 0;
 
+    final totalProjects = scanResult.priorityProjects.length + scanResult.defaultProjects.length;
+    verboseLogger?.call('Starting cleanup: $totalProjects project(s), ${scanResult.globalTargets.length} global target(s)');
+
     // Clean priority projects
-    for (final project in scanResult.priorityProjects) {
-      final result = await cleaner.cleanProject(project);
-      allDeletedPaths.addAll(result.deletedPaths);
-      allFailedPaths.addAll(result.failedPaths);
-      totalReclaimed += result.reclaimedSize;
+    if (scanResult.priorityProjects.isNotEmpty) {
+      verboseLogger?.call('Cleaning ${scanResult.priorityProjects.length} priority project(s)...');
+      int projectIndex = 0;
+      for (final project in scanResult.priorityProjects) {
+        projectIndex++;
+        verboseLogger?.call('Priority project $projectIndex/${scanResult.priorityProjects.length}');
+        final result = await cleaner.cleanProject(project);
+        allDeletedPaths.addAll(result.deletedPaths);
+        allFailedPaths.addAll(result.failedPaths);
+        totalReclaimed += result.reclaimedSize;
+      }
     }
 
     // Clean default projects
-    for (final project in scanResult.defaultProjects) {
-      final result = await cleaner.cleanProject(project);
-      allDeletedPaths.addAll(result.deletedPaths);
-      allFailedPaths.addAll(result.failedPaths);
-      totalReclaimed += result.reclaimedSize;
+    if (scanResult.defaultProjects.isNotEmpty) {
+      verboseLogger?.call('Cleaning ${scanResult.defaultProjects.length} default project(s)...');
+      int projectIndex = 0;
+      for (final project in scanResult.defaultProjects) {
+        projectIndex++;
+        verboseLogger?.call('Default project $projectIndex/${scanResult.defaultProjects.length}');
+        final result = await cleaner.cleanProject(project);
+        allDeletedPaths.addAll(result.deletedPaths);
+        allFailedPaths.addAll(result.failedPaths);
+        totalReclaimed += result.reclaimedSize;
+      }
     }
 
     // Clean global targets
     if (scanResult.globalTargets.isNotEmpty) {
+      verboseLogger?.call('Cleaning ${scanResult.globalTargets.length} global target(s)...');
       final result = await cleaner.cleanGlobalTargets(scanResult.globalTargets);
       allDeletedPaths.addAll(result.deletedPaths);
       allFailedPaths.addAll(result.failedPaths);
       totalReclaimed += result.reclaimedSize;
     }
+
+    final cleanTime = DateTime.now().difference(cleanStart);
+    verboseLogger?.call('Cleanup completed in ${cleanTime.inMilliseconds / 1000.0}s');
+    verboseLogger?.call('Total: ${allDeletedPaths.length} deleted, ${allFailedPaths.length} failed, ${formatSize(totalReclaimed)} reclaimed');
 
     return CleanResult(
       deletedPaths: allDeletedPaths,
