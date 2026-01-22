@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.2] - 2025-01-13
+## [0.1.2] - 2026-01-22
 
 ### Added
 - Enhanced verbose output with real-time progress tracking
@@ -24,14 +24,14 @@ All notable changes to this project will be documented in this file.
 - Better visibility into what the tool is doing at each stage
 - More informative error context in verbose mode
 
-## [0.1.1] - 2025-01-13
+## [0.1.1] - 2026-01-13
 
 ### Fixed
 - Fixed argument parsing bug where command-specific options (--root, --include-defaults, etc.) were not recognized
 - Fixed issue where global parser was rejecting unknown options before passing them to command parsers
 - Improved argument parsing to correctly handle global flags both before and after command name
 
-## [0.1.0] - 2024-01-XX
+## [0.1.0] - 2025-12-20
 
 ### Added
 - Initial release
