@@ -40,33 +40,53 @@ class CacheCleaner {
   /// Whether to move to trash instead of deleting directly.
   final bool moveToTrash;
 
-  CacheCleaner({this.moveToTrash = false});
+  /// Optional verbose logger for progress updates.
+  final void Function(String message)? verboseLogger;
+
+  CacheCleaner({
+    this.moveToTrash = false,
+    this.verboseLogger,
+  });
 
   /// Cleans cache targets from a project.
   /// Returns a CleanResult with deleted paths and errors.
   Future<CleanResult> cleanProject(ProjectInfo project) async {
+    verboseLogger?.call('Cleaning project: ${project.path}');
+    verboseLogger?.call('  Targets: ${project.targets.length}');
+    
     final deletedPaths = <String>[];
     final failedPaths = <String, String>{};
     int reclaimedSize = 0;
 
-    for (final target in project.targets) {
+    for (int i = 0; i < project.targets.length; i++) {
+      final target = project.targets[i];
+      verboseLogger?.call('  [$i/${project.targets.length}] ${target.type}: ${target.path}');
+      
       // Validate deletion safety
       final validationError =
           SafetyUtils.validateDeletion(target, project.path);
       if (validationError != null) {
+        verboseLogger?.call('    ❌ Validation failed: $validationError');
         failedPaths[target.path] = validationError;
         continue;
       }
 
       // Attempt deletion
+      final deleteStart = DateTime.now();
       final success = await _deleteTarget(target);
+      final deleteTime = DateTime.now().difference(deleteStart);
+      
       if (success) {
         deletedPaths.add(target.path);
         reclaimedSize += target.size;
+        verboseLogger?.call('    ✅ Deleted (${_formatSize(target.size)}) in ${deleteTime.inMilliseconds}ms');
       } else {
+        verboseLogger?.call('    ❌ Failed to delete');
         failedPaths[target.path] = 'Failed to delete';
       }
     }
+
+    verboseLogger?.call('  Project complete: ${deletedPaths.length} deleted, ${failedPaths.length} failed, ${_formatSize(reclaimedSize)} reclaimed');
 
     return CleanResult(
       deletedPaths: deletedPaths,
@@ -77,13 +97,19 @@ class CacheCleaner {
 
   /// Cleans a list of global cache targets.
   Future<CleanResult> cleanGlobalTargets(List<CacheTarget> targets) async {
+    verboseLogger?.call('Cleaning ${targets.length} global target(s)...');
+    
     final deletedPaths = <String>[];
     final failedPaths = <String, String>{};
     int reclaimedSize = 0;
 
-    for (final target in targets) {
+    for (int i = 0; i < targets.length; i++) {
+      final target = targets[i];
+      verboseLogger?.call('  [$i/${targets.length}] ${target.type}: ${target.path}');
+      
       // Validate that it's a global target
       if (!target.isGlobal) {
+        verboseLogger?.call('    ❌ Not a global cache target');
         failedPaths[target.path] = 'Not a global cache target';
         continue;
       }
@@ -94,19 +120,28 @@ class CacheCleaner {
         target.path, // For global targets, use the target path itself as root
       );
       if (validationError != null) {
+        verboseLogger?.call('    ❌ Validation failed: $validationError');
         failedPaths[target.path] = validationError;
         continue;
       }
 
       // Attempt deletion
+      verboseLogger?.call('    Deleting ${_formatSize(target.size)}...');
+      final deleteStart = DateTime.now();
       final success = await _deleteTarget(target);
+      final deleteTime = DateTime.now().difference(deleteStart);
+      
       if (success) {
         deletedPaths.add(target.path);
         reclaimedSize += target.size;
+        verboseLogger?.call('    ✅ Deleted in ${deleteTime.inMilliseconds / 1000.0}s');
       } else {
+        verboseLogger?.call('    ❌ Failed to delete');
         failedPaths[target.path] = 'Failed to delete';
       }
     }
+
+    verboseLogger?.call('Global targets complete: ${deletedPaths.length} deleted, ${failedPaths.length} failed, ${_formatSize(reclaimedSize)} reclaimed');
 
     return CleanResult(
       deletedPaths: deletedPaths,
@@ -141,6 +176,18 @@ class CacheCleaner {
     } catch (e) {
       return false;
     }
+  }
+
+  /// Helper to format size for verbose output.
+  static String _formatSize(int bytes) {
+    if (bytes < 1024) return '$bytes B';
+    if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(2)} KB';
+    }
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(2)} MB';
+    }
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(2)} GB';
   }
 }
 
