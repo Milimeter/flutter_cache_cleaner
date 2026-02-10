@@ -15,6 +15,7 @@ Over years of Flutter development, machines often accumulate tens of gigabytes o
 - **Efficient**: Fast scanning even with large project directories
 - **Flexible**: Supports optional targets and global caches
 - **JSON output**: Machine-readable output for scripting
+- **Auto-update**: When run from a global install, checks pub.dev for a newer version and can update and re-run in one go
 
 ## Installation
 
@@ -36,9 +37,11 @@ dart pub global activate --source path .
 
 After installation, ensure `~/.pub-cache/bin` is in your PATH, or use `dart pub global run flutter_cache_cleaner` instead.
 
+When you run the CLI from a global install, it checks pub.dev for a newer version. If one exists, it will show a short message, update via `dart pub global activate`, and re-run your command with the new version. To disable this check (e.g. in CI or offline), pass `--no-update-check`.
+
 ## Usage
 
-### Scan Command dart run lib/main.dart doctor --verbose
+### Scan Command
 
 Scan for Flutter projects and cache files without deleting anything:
 
@@ -115,6 +118,7 @@ flutter_cleaner doctor --json
 - `--quiet, -q`: Suppress all output except errors
 - `--json`: Output in JSON format
 - `--no-color`: Disable colored output
+- `--no-update-check`: Skip checking for CLI updates on pub.dev (useful in CI or offline)
 
 **Verbose Mode**: When enabled, provides real-time feedback including:
 - Progress indicators (e.g., "Analyzing project 15/62")
