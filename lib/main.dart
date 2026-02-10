@@ -1,17 +1,32 @@
 #!/usr/bin/env dart
 
+import 'dart:async';
 import 'dart:io';
 import 'package:args/args.dart';
+import 'package:pub_updater/pub_updater.dart';
+
 import 'commands/scan_command.dart';
 import 'commands/clean_command.dart';
 import 'commands/doctor_command.dart';
+import 'version.dart';
 
 Future<void> main(List<String> arguments) async {
+  // Optional auto-update when running from global install (skip if opted out or not from pub-cache)
+  if (!arguments.contains('--no-update-check') &&
+      Platform.script.path.contains('.pub-cache')) {
+    final exitCode = await _runUpdateCheckIfNeeded(arguments);
+    if (exitCode != null) {
+      exit(exitCode);
+    }
+  }
+
   final parser = ArgParser()
     ..addFlag('verbose', abbr: 'v', help: 'Enable verbose output')
     ..addFlag('quiet', abbr: 'q', help: 'Suppress all output except errors')
     ..addFlag('json', help: 'Output in JSON format')
-    ..addFlag('no-color', help: 'Disable colored output');
+    ..addFlag('no-color', help: 'Disable colored output')
+    ..addFlag('no-update-check',
+        help: 'Skip checking for CLI updates on pub.dev');
 
   final commands = <String, CommandRunner>{};
 
@@ -160,7 +175,8 @@ Future<void> main(List<String> arguments) async {
     if (arg == '--verbose' || arg == '-v' ||
         arg == '--quiet' || arg == '-q' ||
         arg == '--json' ||
-        arg == '--no-color') {
+        arg == '--no-color' ||
+        arg == '--no-update-check') {
       continue;
     }
     // Skip flag values (like --no-color which doesn't have a value, but be safe)
@@ -247,6 +263,56 @@ Future<void> main(List<String> arguments) async {
       stderr.writeln(stackTrace);
     }
     exit(1);
+  }
+}
+
+/// Runs update check when from global install. Returns exit code to use if
+/// an update was performed and the process should exit (caller should re-exec);
+/// returns null to continue with normal CLI.
+Future<int?> _runUpdateCheckIfNeeded(List<String> arguments) async {
+  const packageName = 'flutter_cache_cleaner';
+  const timeout = Duration(seconds: 5);
+
+  try {
+    final pubUpdater = PubUpdater();
+    final isUpToDate = await pubUpdater
+        .isUpToDate(
+          packageName: packageName,
+          currentVersion: packageVersion,
+        )
+        .timeout(timeout);
+
+    if (isUpToDate) return null;
+
+    final latestVersion =
+        await pubUpdater.getLatestVersion(packageName).timeout(timeout);
+
+    stderr.writeln(
+        'New version available! $packageVersion → $latestVersion');
+    stderr.writeln('Updating...');
+    await pubUpdater.update(packageName: packageName);
+    stderr.writeln('Updated to $latestVersion!');
+
+    final filteredArgs =
+        arguments.where((a) => a != '--no-update-check').toList();
+    final result = await Process.run(
+      'dart',
+      [
+        'pub',
+        'global',
+        'run',
+        'flutter_cache_cleaner:flutter_cleaner',
+        ...filteredArgs,
+      ],
+      runInShell: false,
+    );
+    stdout.write(result.stdout);
+    stderr.write(result.stderr);
+    return result.exitCode;
+  } on TimeoutException {
+    return null;
+  } on Exception {
+    return null;
   }
 }
 
